@@ -12,13 +12,17 @@ Using npm:
 
 Once the package is installed, you can import the controller:
 
-    import TplController from 'tpl-controller';
+```javascript
+import TplController from 'tpl-controller';
+```
 
 ## Usage
 
-    const tplController = new TplController({ ipAddress, password });
+```javascript
+const tplController = new TplController({ ipAddress, password });
 
-    const { state } = await tplController.turnLed('toggle'); // on, off, toggle
+const { state } = await tplController.turnLed('toggle'); // on, off, toggle
+```
 
 See [example.mjs](src/example.mjs) to get an insight.
 
