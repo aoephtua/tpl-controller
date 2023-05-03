@@ -241,7 +241,7 @@ class TplController {
                 method: 'post',
                 headers: {
                     'Host': ipAddress,
-                    'Referer': url
+                    'Referer': url + '/'
                 },
                 url,
                 ...config

@@ -28,7 +28,9 @@ See [example.mjs](src/example.mjs) to get an insight.
 
 ## Compatibility
 
-- TL-WA850RE 7.0 (1.0.10 Build 211117)
+- TL-WA850RE 7.0
+  - 1.0.1 Build 201029
+  - 1.0.10 Build 211117
 
 ## License
 
