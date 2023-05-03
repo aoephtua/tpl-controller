@@ -1,6 +1,6 @@
 {
   "name": "tpl-controller",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Controller to set values of TP-Link device",
   "type": "module",
   "main": "./src/tpl-controller.mjs",
