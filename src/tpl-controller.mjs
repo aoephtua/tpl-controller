@@ -53,7 +53,7 @@ class TplController {
                 const { ipAddress, password } = this.settings;
     
                 if (ipAddress && password) {
-                    return await this.#process(
+                    return await this.#processCommand(
                         ipAddress,
                         password,
                         command,
@@ -77,15 +77,34 @@ class TplController {
     turnLed = async (state) => await this.turnStates(this.commands.led, { enable: state });
 
     /**
-     * Processes requested command of TPL device.
+     * Executes POST request method to restart TPL device.
+     * 
+     * @returns Object with result of processed action.
+     */
+    restart = async () => {
+        const { ipAddress, password } = this.settings;
+    
+        if (ipAddress && password) {
+            return await this.#process(
+                ipAddress, password,
+                async (id, result) => {
+                    const response = await this.#postCode(ipAddress, 6, 1, id);
+
+                    result.state = this.#getStateByResponse(response);
+                }
+            );
+        }
+    };
+
+    /**
+     * Processes request of TPL device.
      * 
      * @param {string} ipAddress The target IP address of TPL device.
      * @param {string} password The plain passphrase of TPL device.
-     * @param {object} command Object with command configuration.
-     * @param {object} states Object with upcoming states.
+     * @param {function} callback The callback function of process.
      * @returns Object with result of processed action.
      */
-    async #process(ipAddress, password, command, states) {
+    async #process(ipAddress, password, callback) {
         const result = {};
 
         const authInfo = await this.#fetchAuthInfo(ipAddress);
@@ -98,13 +117,7 @@ class TplController {
             const { status, error } = await this.#login(ipAddress, id);
 
             if (status === 200) {
-                const values = await this.#fetchState(ipAddress, id, command.id);
-
-                if (values?.length) {
-                    result.state = await this.#processState(ipAddress, command, states, values, id);
-
-                    await this.#logout(ipAddress, id);
-                }
+                await callback(id, result);
             } else if (error) {
                 return this.#state(error);
             }
@@ -112,6 +125,26 @@ class TplController {
 
         return result;
     }
+
+    /**
+     * Processes requested command of TPL device.
+     * 
+     * @param {string} ipAddress The target IP address of TPL device.
+     * @param {string} password The plain passphrase of TPL device.
+     * @param {object} command Object with command configuration.
+     * @param {object} states Object with upcoming states.
+     * @returns Object with result of processed action.
+     */
+    #processCommand = async (ipAddress, password, command, states) =>
+        this.#process(ipAddress, password, async (id, result) => {
+            const values = await this.#fetchState(ipAddress, id, command.id);
+
+            if (values?.length) {
+                result.state = await this.#processState(ipAddress, command, states, values, id);
+
+                await this.#logout(ipAddress, id);
+            }
+        });
 
     /**
      * Processes upcoming command states of TPL device.
@@ -129,11 +162,20 @@ class TplController {
         if (data) {
             const result = await this.#setState(ipAddress, id, data);
 
-            return result.data.startsWith('00000') ? 'success' : 'error';
+            return this.#getStateByResponse(result);
         } else {
             return 'no action';
         }
     }
+
+    /**
+     * Gets state of response by data.
+     * 
+     * @param {object} response Object with response of HTTP request.
+     * @returns String with state of response.
+     */
+    #getStateByResponse = (response) =>
+        response.data.startsWith('00000') ? 'success' : 'error';
     
     /**
      * Gets encrypted authentication identifier by password of TPL device. 

@@ -18,10 +18,24 @@ import TplController from 'tpl-controller';
 
 ## Usage
 
+Create instance of controller class:
+
 ```javascript
 const tplController = new TplController({ ipAddress, password });
+```
 
+### Commands
+
+**turnLed**
+
+```javascript
 const { state } = await tplController.turnLed('toggle'); // on, off, toggle
+```
+
+**restart**
+
+```javascript
+const { state } = await tplController.restart();
 ```
 
 See [example.mjs](src/example.mjs) to get an insight.
